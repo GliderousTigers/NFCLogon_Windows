@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" GroupingSetting="Access" MembersFormat="FullSignature">
+  <Class Name="CClassFactory">
+    <Position X="13" Y="7.25" Width="4.75" />
+    <TypeIdentifier>
+      <HashCode>AAAABAAAAAAABAAAAIAIAAAAAAAAgACAAAAAABAAAAA=</HashCode>
+      <FileName>Dll.cpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NFCCredential">
+    <Position X="18.5" Y="7.25" Width="10.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAQ4ABQCIgAQCACUIIgCAggCAMoIABhggAgA=</HashCode>
+      <FileName>NFCCredential.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NFCProvider">
+    <Position X="19" Y="0.5" Width="8.25" />
+    <TypeIdentifier>
+      <HashCode>AAgABAAAAAEABQCgAAAAMAAAACCAgACAAIAIAhBABAA=</HashCode>
+      <FileName>NFCProvider.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Comm">
+    <Position X="9.25" Y="0.5" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAEAAAIAAgAAAAIAAASIACAAAAAIAAAAAAAAA=</HashCode>
+      <FileName>Comm.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CommResponse">
+    <Position X="2" Y="7" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAgAAAA=</HashCode>
+      <FileName>CommResponse.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CommListener">
+    <Position X="14.5" Y="1.25" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>CommListener.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UDPComm">
+    <Position X="9.5" Y="4.75" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAgoAAAAAAIAAAIAMAAAAAAAAQAAgAAIAQABAAAAA=</HashCode>
+      <FileName>UDPComm.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UDPCommResponse">
+    <Position X="0.5" Y="10.5" Width="5.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAABAAAAAAAABAEQAAAAACAAAAAAAIAAAAAAAAA=</HashCode>
+      <FileName>UDPCommResponse.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AbstractPacket">
+    <Position X="4.75" Y="0.5" Width="3.75" />
+    <TypeIdentifier>
+      <HashCode>AACACIAAgAAAAAAIAAAARAAAAAAAAAAAgAAAAAAAIAA=</HashCode>
+      <FileName>AbstractPacket.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PacketField">
+    <Position X="0.5" Y="0.5" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAQAAAkgAAAAAAAAAABAAAAAAAAAAAAAAAQAAAAAAA=</HashCode>
+      <FileName>PacketField.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RSAPublicKeyPacket">
+    <Position X="5.25" Y="4.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAIAAAAAAAAAAAkAEAABAAAAAAAAAEAAAAAAAAAA=</HashCode>
+      <FileName>RSAPublicKeyPacket.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ByteUtils">
+    <Position X="13.25" Y="10.5" Width="4.5" />
+    <TypeIdentifier>
+      <HashCode>CIAAAAAAABAAgAAAAgAAAAAAAAAAAAAAAAAAABAAAAA=</HashCode>
+      <FileName>ByteUtils.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Crypto">
+    <Position X="9" Y="10.5" Width="4" />
+    <TypeIdentifier>
+      <HashCode>AAAEIAABAAgAAAAggECAAAAAAAAgAAgAIAAABAAAAAA=</HashCode>
+      <FileName>Crypto.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CharUtils">
+    <Position X="6" Y="12" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAABAAAA=</HashCode>
+      <FileName>CharUtils.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="SAMPLE_FIELD_ID">
+    <Position X="7" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAABBAAAAAAAAAAQAAAAAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>common.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
