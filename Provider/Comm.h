@@ -13,9 +13,11 @@ and the PC. A subclass should be created for each communication mean.
 #include <vector>
 #include <Windows.h>
 #include <thread>
+#include <atomic>
 
 #include "CommListener.h"
 #include "CommResponse.h"
+#include "Journal.h"
 
 using namespace std;
 
@@ -78,7 +80,7 @@ private:
 	/**
 	* whether or not the communication was closed
 	*/
-	bool closed;
+	std::atomic_bool closed;
 
 	/**
 	* thread in which the communication is run

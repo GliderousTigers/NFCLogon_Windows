@@ -6,6 +6,7 @@
 #include <tchar.h>
 #include "NFCCredential.h"
 #include "guid.h"
+#include "Journal.h"
 #include <iostream>
 #include <ntstatus.h>
 #include <subauth.h>
@@ -48,6 +49,7 @@ HRESULT NFCCredential::Initialize(
 	)
 {
 
+	Journal::log("Credential::Initialize\n");
 	UNREFERENCED_PARAMETER(pwzPassword);
 
 	HRESULT hr = S_OK;
@@ -94,6 +96,7 @@ HRESULT NFCCredential::Advise(
 	ICredentialProviderCredentialEvents* pcpce
 	)
 {
+	Journal::log("Credential::Advise\n");
 	if (_pCredProvCredentialEvents != NULL)
 	{
 		_pCredProvCredentialEvents->Release();
@@ -106,6 +109,7 @@ HRESULT NFCCredential::Advise(
 
 HRESULT NFCCredential::UnAdvise()
 {
+	Journal::log("Credential::UnAdvise\n");
 	if (_pCredProvCredentialEvents)
 	{
 		_pCredProvCredentialEvents->Release();
@@ -117,6 +121,7 @@ HRESULT NFCCredential::UnAdvise()
 
 HRESULT NFCCredential::SetSelected(BOOL* pbAutoLogon)  
 {
+	Journal::log("Credential::SetSelected\n");
 	if(username && password && domain && !this->lastLoginFailed){
 		*pbAutoLogon = TRUE;
 	}else{
@@ -137,6 +142,7 @@ HRESULT NFCCredential::SetSelected(BOOL* pbAutoLogon)
 
 HRESULT NFCCredential::SetDeselected()
 {
+	Journal::log("Credential::SetDeselected\n");
 	HRESULT hr = S_OK;
 	return hr;
 }
@@ -147,6 +153,9 @@ HRESULT NFCCredential::GetFieldState(
 	CREDENTIAL_PROVIDER_FIELD_INTERACTIVE_STATE* pcpfis
 	)
 {
+	std::stringstream ss;
+	ss << dwFieldID;
+	Journal::log("Credential::GetFieldState " + ss.str() + "\n");
 	HRESULT hr;
 
 	if ((dwFieldID < ARRAYSIZE(_rgFieldStatePairs)) && pcpfs && pcpfis)
@@ -317,6 +326,8 @@ HRESULT NFCCredential::GetSerialization(
 	UNREFERENCED_PARAMETER(ppwzOptionalStatusText);
 	UNREFERENCED_PARAMETER(pcpsiOptionalStatusIcon);
 
+	Journal::log("Credential::GetSerialization\n");
+
 	KERB_INTERACTIVE_LOGON kil;
 	ZeroMemory(&kil, sizeof(kil));
 
@@ -325,9 +336,9 @@ HRESULT NFCCredential::GetSerialization(
 	this->lastLoginFailed = true;
 
 	WCHAR wsz[MAX_COMPUTERNAME_LENGTH+1];
-	DWORD cch = ARRAYSIZE(wsz);
+	DWORD cch = ARRAYSIZE(wsz);	
 	GetComputerNameW(wsz, &cch);
-	hr = UnicodeStringInitWithString(domain, &kil.LogonDomainName);
+	hr = UnicodeStringInitWithString(wsz, &kil.LogonDomainName);
 	hr = UnicodeStringInitWithString(username, &kil.UserName);
 	hr = UnicodeStringInitWithString(password, &kil.Password);
 
@@ -351,6 +362,7 @@ HRESULT NFCCredential::GetSerialization(
 			}
 			else
 			{
+				Journal::log("error getSerialization\n");
 				DWORD dwErr = GetLastError();
 				hr = HRESULT_FROM_WIN32(dwErr);
 			}

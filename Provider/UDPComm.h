@@ -8,9 +8,10 @@ Class for UDP communication between the PC and the Device.
 */
 
 #pragma once
-#include "NFCProvider.h"
 
 #include "Comm.h"
+
+#define BUFFER_LENGTH 512
 
 class UDPComm : public Comm
 {
@@ -25,10 +26,6 @@ public:
 	UDPComm(int port, char* broadcastData = NULL);
 	~UDPComm();
 
-	/**
-	* Sets the broadcast flag to false;
-	*/
-	void stopBroadcasting();
 protected:
 	/**
 	* @copydoc Comm::run()
@@ -53,11 +50,6 @@ private:
 	* @return S_OK if it succeeds else, an error code.
 	*/
 	HRESULT bindSocket(int port);
-
-	/**
-	* whether to broadcast or not
-	*/
-	bool broadcast;
 
 	/**
 	* socket on which to send and receive data

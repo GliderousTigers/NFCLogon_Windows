@@ -11,6 +11,7 @@
 #include <windows.h>
 #include "Dll.h"
 #include "guid.h"
+#include "Journal.h"
 
 static LONG g_cRef = 0;   // global dll reference count
 
@@ -134,7 +135,6 @@ BOOL WINAPI DllMain(
 	)
 {
 	UNREFERENCED_PARAMETER(pReserved);
-
 	switch (dwReason)
 	{
 	case DLL_PROCESS_ATTACH:

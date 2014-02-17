@@ -14,6 +14,8 @@ This clases manages one or more Credentials.
 #include "helpers.h"
 #include "Crypto.h"
 #include "CommListener.h"
+#include "Comm.h"
+#include "UDPComm.h"
 
 #define MAX_CREDENTIALS 1
 
@@ -156,5 +158,7 @@ private:
 	/**
 	* Pointers to the credentials which will be enumerated by the provider
 	*/
-	static NFCCredential *_rgpCredentials[MAX_CREDENTIALS]; 
+	static NFCCredential* _rgpCredentials[MAX_CREDENTIALS]; 
+
+	Comm* comm;
 };

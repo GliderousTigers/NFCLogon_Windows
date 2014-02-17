@@ -52,3 +52,13 @@ unsigned char* ByteUtils::concat(unsigned char* first, ...)
 	va_end(others);
 	return temp;
 }
+
+char* ByteUtils::subArray(char* data, int offset, int length)
+{
+	char* subArray = new char[length + 1];
+	std::memcpy(subArray, data + offset, length);
+	subArray[length] = '\0';
+	std::printf(subArray);
+
+	return subArray;
+}

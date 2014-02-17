@@ -45,7 +45,7 @@ protected:
 	{
 		this->packetType = packetType;
 	}
-	~AbstractPacket() {};
+	virtual ~AbstractPacket() {};
 
 	/**
 	* Called when receiving a packet and creating it with {@link #get(byte[])}, after

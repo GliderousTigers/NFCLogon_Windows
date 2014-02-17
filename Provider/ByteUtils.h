@@ -39,6 +39,8 @@ public:
 	*/
 	static unsigned char* subArray(unsigned char* data, int offset, int lenght);
 
+	static char* subArray(char* data, int offset, int length);
+
 	/**
 	* Concatenates byte arrays.
 	* @param first the first array.

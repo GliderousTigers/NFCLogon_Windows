@@ -9,6 +9,6 @@ UDPCommResponse::UDPCommResponse(SOCKET* s, UDPComm* comm, char* data, sockaddr*
 
 void UDPCommResponse::reply(char* data)
 {
-	this->comm->stopBroadcasting();
 	sendto(*this->s, this->data, strlen(this->data), 0, (SOCKADDR*)&this->senderInfos, sizeof(this->senderInfos));
 }
+UDPCommResponse::~UDPCommResponse() {}

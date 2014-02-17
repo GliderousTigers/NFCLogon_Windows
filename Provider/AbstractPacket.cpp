@@ -3,6 +3,7 @@
 #include <string>
 #include "ByteUtils.h"
 #include "CharUtils.h"
+#include "RawPacket.h"
 
 AbstractPacket* AbstractPacket::get(unsigned char* data)
 {
@@ -50,6 +51,10 @@ AbstractPacket* AbstractPacket::createInstance(unsigned char* type)
 {
 	if (type == RSAPublicKeyPacket::PACKET_TYPE)
 	{
-			return new RSAPublicKeyPacket();
+		return new RSAPublicKeyPacket();
+	}
+	else if (type == RawPacket::PACKET_TYPE)
+	{
+		return new RawPacket();
 	}
 }

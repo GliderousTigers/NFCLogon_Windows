@@ -7,26 +7,34 @@
 #include <sstream>
 
 #include "UDPComm.h"
+#include "UDPCommResponse.h"
+#include "ByteUtils.h"
 
 using namespace std;
 
 #pragma comment(lib, "Ws2_32.lib")
 
-UDPComm::UDPComm(int port, char* broadcastData)
+UDPComm::UDPComm(int port, char* broadcastData) : Comm()
 {
+	Journal::log("UDPCommCreate\n");
 	this->port = port;
-
-	this->broadcast = (broadcastData != NULL);
 	
 	if (SUCCEEDED(this->initWinSock()))
 	{
-		if (this->broadcast)
+		Journal::log("Winsock initiated\n");
+		if (SUCCEEDED(this->createSocket(port)))
 		{
-			if (SUCCEEDED(this->createSocket(port)))
-			{
-				this->sendData = broadcastData;
-			}
+			Journal::log("Socket created\n");
+			this->sendData = broadcastData;
 		}
+		else
+		{
+			Journal::log("Error on Socket creation\n");
+		}
+	}
+	else
+	{
+		Journal::log("Error on Winsock initialization\n");
 	}
 }
 
@@ -47,15 +55,6 @@ HRESULT UDPComm::initWinSock()
 
 HRESULT UDPComm::createSocket(int port)
 {
-	//stringstream ss;
-	//ss << port;
-
-	////get host (us) socket info
-	//if (getaddrinfo(NULL, ss.str().c_str(), hints, &(this->hostInfos)) != 0)
-	//{
-	//	freeaddrinfo(this->hostInfos);
-	//	return HRESULT_FROM_WIN32(WSAGetLastError());
-	//}
 	this->s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
 	if (this->s == SOCKET_ERROR)
@@ -69,87 +68,49 @@ HRESULT UDPComm::createSocket(int port)
 HRESULT UDPComm::bindSocket(int port)
 {
 	struct sockaddr_in server;
-	hostent* localHost;
-	localHost = gethostbyname("");
-	char* localIP = inet_ntoa(*(struct in_addr *)*localHost->h_addr_list);
-
 	server.sin_family = AF_INET;
 	server.sin_port = htons(port);
-	server.sin_addr.s_addr = inet_addr(localIP);
+	server.sin_addr.s_addr = htonl(INADDR_ANY);
 
-	bind(this->s, (SOCKADDR*) &server, sizeof(server));
-	if (this->s == SOCKET_ERROR)
+	int result = ::bind(this->s, (SOCKADDR*)&server, sizeof(server));
+	if (this->s == INVALID_SOCKET || result == SOCKET_ERROR)
 	{
 		closesocket(this->s);
 		return HRESULT_FROM_WIN32(WSAGetLastError());
 	}
 	return S_OK;
 }
-void UDPComm::stopBroadcasting()
-{
-	this->broadcast = FALSE;
-}
 
 void UDPComm::run()
 {
+	Journal::log(("thread running\n"));
 	struct sockaddr_in fromAddr;
-	fromAddr.sin_port = htons(this->port);
-	while (this->isClosed())
-	{
-		if (this->broadcast)
+	int fromLength = sizeof(fromAddr);
+	this->receivedData = new char[BUFFER_LENGTH];
+
+	//while (!this->isClosed())
+	//{
+		int retour = recvfrom(this->s, this->receivedData, BUFFER_LENGTH, 0, (struct sockaddr *)&fromAddr, &fromLength);
+		//if (retour == 0)
+		//{
+		//	continue;
+		//}
+		//else if (retour > 0)
+		if (retour > 0)
 		{
-			//determine if we receive or send first
-			if (sendto(this->s, this->sendData, strlen(this->sendData), 0, (SOCKADDR*)&fromAddr, sizeof(fromAddr)) == SOCKET_ERROR)
-			{
-			}
+			char* cleanedData = ByteUtils::subArray(this->receivedData, 0, retour);
+			Journal::log(("received" + string(cleanedData) + "\n"));
+			this->notifyListeners(UDPCommResponse(&this->s, this, cleanedData, (SOCKADDR*)&fromAddr));
 		}
-	}
+		else
+		{
+			stringstream ss;
+			ss << WSAGetLastError();
+			Journal::log(("error winsock:" + ss.str() + "\n"));
+			return;
+		}
+	//}
+	Journal::log("thread endded\n");
+	//::closesocket(this->s);
 }
 
-//HRESULT WirelessListener::Receive()
-//{
-//	char dataReceived[WirelessListener::BUFFER_LENGTH];
-//	sockaddr_in tempAddr;
-//	int fromLength = sizeof(tempAddr);
-//
-//	int receiverResult;
-//
-//	do 
-//	{
-//		receiverResult = recvfrom(this->s, dataReceived, WirelessListener::BUFFER_LENGTH, 0, (struct sockaddr *) &tempAddr, &fromLength);
-//		if (receiverResult > 0)
-//		{
-//			this->fromAddr = tempAddr;
-//			this->handleReceivedData(dataReceived, receiverResult);
-//		}
-//		
-//	} while(receiverResult > 0);
-//
-//	std::printf("exiting\n");
-//	return S_OK;
-//}
-
-//void WirelessListener::handleReceivedData(char* buffer, int dataLenght)
-//{
-//	//analyze data and call function corresponding to the data sended.
-//	string data(buffer);
-//	data = data.substr(0, dataLenght);
-//	printf("\n");
-//	if (data == "unlock")
-//	{
-//		this->Send(data.data());
-//		//this->provider->QueryInterface(); //start the authentification process
-//	}
-//}
-
-//HRESULT WirelessListener::Send(const char* data)
-//{
-//	if (sendto(this->s, data, strlen(data), 0, (struct sockaddr*) &this->fromAddr, sizeof(this->fromAddr)) == SOCKET_ERROR) 
-//	{
-//		//throw ICredentialListenerException("Socket Error when sending data");
-//		closesocket(this->s);
-//		this->s = INVALID_SOCKET; //so that it is rebinded on next receive.
-//        return HRESULT_FROM_WIN32(WSAGetLastError());
-//    }
-//	return S_OK;
-//}

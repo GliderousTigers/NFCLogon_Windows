@@ -16,6 +16,7 @@
 #include <iostream>
 #include "common.h"
 #include <stdio.h>
+#include <sstream>
 
 NFCCredential* NFCProvider::_rgpCredentials[MAX_CREDENTIALS];
 
@@ -24,11 +25,15 @@ NFCProvider::NFCProvider():
 	_dwNumCreds(0)
 {
 	DllAddRef();
+	this->comm = new UDPComm(41337);
+	this->comm->addListener(this);
 	ZeroMemory(_rgpCredentials, sizeof(_rgpCredentials));
+	Journal::log("Provider::Provider constructor\n");
 }
 
 NFCProvider::~NFCProvider()
 {
+	Journal::log("Provider::Provider destructor\n");
 	for (size_t i = 0; i < _dwNumCreds; i++)
 	{
 		if (_rgpCredentials[i] != NULL)
@@ -38,6 +43,7 @@ NFCProvider::~NFCProvider()
 	}
 
 	DllRelease();
+	delete this->comm;
 }
 
 
@@ -46,157 +52,28 @@ bool NFCThreadRunning = true;
 NFCProvider *prp;
 bool doAutoLogin = false;
 
-void getCredentials(char* token){
-
-	//HKEY hKey;
-	//if(RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Tyler Menezes\\Rfid Login\\Keys", 0, KEY_READ, &hKey) != ERROR_SUCCESS){
-	//	delete hKey;
-	//	return; // Token not recognized.
-	//}
-
-	//std::wstring keySalt;
-	//GetStringRegKey(hKey, L"Salt", keySalt, L"bad");
-
-
-	//CSHA1 *sha1 = new CSHA1();
-	//sha1->Update((unsigned char*)token, strlen(token));
-	//sha1->Update((unsigned char*)s2cs(ws2s(keySalt)), wcslen(keySalt.c_str()));
-	//sha1->Final();
-	//std::wstring hash;
-	//sha1->ReportHashStl(hash, CSHA1::REPORT_HEX_SHORT);
-	//delete sha1;
-
-	//std::string key = std::string("SOFTWARE\\Tyler Menezes\\Rfid Login\\Keys\\");
-	//key += ws2s(hash);
-
-	//if(RegOpenKeyExW(HKEY_LOCAL_MACHINE, s2ws(key).c_str(), 0, KEY_READ, &hKey) != ERROR_SUCCESS){
-	//	delete hKey;
-	//	return; // Token not recognized.
-	//}
-
-	//std::wstring salt;
-	//std::wstring username;
-	//std::wstring password;
-	//std::wstring domain;
-
-	//char* cUsername = s2cs(GetCharRegKey(hKey, L"Username"));
-	//char* cPassword = s2cs(GetCharRegKey(hKey, L"Password"));
-	//char* cDomain	= s2cs(GetCharRegKey(hKey, L"Domain"));
-	//
-	//GetStringRegKey(hKey, L"Salt", salt, L"");
-	//
-	//unsigned char* cSalt = (unsigned char*)s2cs(ws2s(salt));
-
-	//std::wstring decryptionKey;
-	//sha1 = new CSHA1();
-	//sha1->Update((unsigned char*)token, strlen(token));
-	//sha1->Update(cSalt, strlen((char*)cSalt));
-	//sha1->Final();
-	//sha1->ReportHashStl(decryptionKey, CSHA1::REPORT_HEX_SHORT);
-	//delete sha1;
-
-	//char* cDecryptionKey = s2cs(ws2s(decryptionKey));
-
-	//decrypt(cUsername, cDecryptionKey);
-	//decrypt(cPassword, cDecryptionKey);
-	//decrypt(cDomain, cDecryptionKey);
-
-	//username = s2ws(std::string(cUsername));
-	//password = s2ws(std::string(cPassword));
-	//domain = s2ws(std::string(cDomain));
-
-	//delete cSalt;
-	//delete cUsername;
-	//delete cPassword;
-	//delete cDomain;
-	//delete cDecryptionKey;
-
-	//prp->_dwNumCreds -= 1;
-
-	//wchar_t* wUsername = wcs2cs(username);
-	//wchar_t* wPassword = wcs2cs(password);
-	//wchar_t* wDomain = wcs2cs(domain);
-
-	//NFCCredential::lastLoginFailed = false;
-
-	//doAutoLogin = true;
-	//prp->_EnumerateOneCredential(prp->_dwNumCreds, wUsername, wPassword, wDomain);
-	//prp->Pcpe->CredentialsChanged(prp->UpAdviseContext);
-}
-
 void NFCProvider::onDataRecieved(CommResponse& response)
 {
+	Journal::log("Provider::Data received: " + string(response.getData()) + "\n");
+	if (string(response.getData()) == "unlock")
+	{
+		prp->_dwNumCreds -= 1;
 
-}
+		wchar_t* username = wcs2cs(s2ws(std::string("")));
+		wchar_t* password = wcs2cs(s2ws(std::string("")));
+		wchar_t* domain = wcs2cs(s2ws(std::string("")));
 
-DWORD WINAPI _NFCReader(LPVOID lpParameter)
-{
-	/*Serial* s = new Serial();
-
-	char *lastTag = new char[128];
-	memset(lastTag, '\0', 128);
-	while(lastTag[0] != '\0');
-
-	int tagCount = 0;
-
-	while(NFCThreadRunning){
-
-		Sleep(50);
-
-		char *id = new char[128];
-		memset(id, '\0', 128);
-		while(id[0] != '\0');
-
-		if(tagCount >= 128){
-			tagCount = 0;
-			memset(lastTag, '\0', 128);
-			while(lastTag[0] != '\0');
-		}
-
-		s->ReadData(id, 1);
-
-		if(strlen(id) > 0){
-			for(int i = 0; i < strlen(id); i++){
-				lastTag[tagCount++] = id[i];
-			}
-		}
-
-		delete id;
-
-
-		for(int i = 0; i < strlen(lastTag); i++){
-			if(lastTag[i] == 0x03){
-				char* fullTag = sanatizeRfidReading(lastTag);
-
-				printf(fullTag);
-
-				getCredentials(fullTag);
-
-				tagCount = 0;
-				memset(lastTag, '\0', 128);
-				while(lastTag[0] != '\0');
-
-				delete fullTag;
-
-				break;
-			}
-		}
+		NFCCredential::lastLoginFailed = false;
+		doAutoLogin = true;
+		
+		prp->_EnumerateOneCredential(prp->_dwNumCreds, username, password, domain);
+		prp->Pcpe->CredentialsChanged(prp->UpAdviseContext);
 	}
-
-	delete lastTag;
-	delete s;*/
-
-	return 0;
-}
-
-
-void InitNFCReader(){
-	NFCThreadRunning = true;
-	hThread = ::CreateThread(NULL, 0, _NFCReader, NULL , 0, NULL);
-}
-
-void StopNFCReader(){
-	NFCThreadRunning = false;
+	else
+	{
+		Journal::log("Provider::Can't unlock\n");
+	}
+	
 }
 
 HRESULT NFCProvider::SetUsageScenario(
@@ -205,7 +82,7 @@ HRESULT NFCProvider::SetUsageScenario(
 	)
 {
 	UNREFERENCED_PARAMETER(dwFlags);
-
+	
 	HRESULT hr;
 	static bool s_bCredsEnumerated = false;
 	switch (cpus)
@@ -213,9 +90,11 @@ HRESULT NFCProvider::SetUsageScenario(
 	case CPUS_LOGON:
 	case CPUS_CREDUI:
 		NFCCredential::lockType = KerbInteractiveLogon;
+		Journal::log("Provider::Set usage KerbInteractiveLogon\n");
 		break;
 	case CPUS_UNLOCK_WORKSTATION:    
 		NFCCredential::lockType = KerbWorkstationUnlockLogon;
+		Journal::log("Provider::Set usage KerbWorkstationUnlockLogon\n");
 		break;
 	case CPUS_CHANGE_PASSWORD:
 		hr = E_NOTIMPL;
@@ -246,6 +125,8 @@ STDMETHODIMP NFCProvider::SetSerialization(
 {
 	UNREFERENCED_PARAMETER(pcpcs);
 
+	Journal::log("Provider::SetSerialization\n");
+
 	return E_NOTIMPL;
 }
 
@@ -257,7 +138,8 @@ HRESULT NFCProvider::Advise(
 	UINT_PTR upAdviseContext
 	)
 {
-	InitNFCReader();
+	Journal::log("Provider::advise\n");
+	this->comm->start();
 
 	Pcpe=pcpe;
 	Pcpe->AddRef();
@@ -269,7 +151,8 @@ HRESULT NFCProvider::Advise(
 
 HRESULT NFCProvider::UnAdvise()
 {
-	StopNFCReader();
+	Journal::log("Provider::Unadvise\n");
+	this->comm->close();
 
 	 if(Pcpe)
 	{
@@ -286,6 +169,7 @@ HRESULT NFCProvider::GetFieldDescriptorCount(
 	DWORD* pdwCount
 	)
 {
+	Journal::log("Provider::Field count\n");
 	*pdwCount = SFI_NUM_FIELDS;
 
 	return S_OK;
@@ -295,7 +179,10 @@ HRESULT NFCProvider::GetFieldDescriptorAt(
 	DWORD dwIndex, 
 	CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** ppcpfd
 	)
-{    
+{   
+	std::stringstream ss;
+	ss << dwIndex;
+	Journal::log("Provider::Get field at" + ss.str() + "\n");
 	HRESULT hr;
 	if ((dwIndex < SFI_NUM_FIELDS) && ppcpfd)
 	{
@@ -315,6 +202,8 @@ HRESULT NFCProvider::GetCredentialCount(
 	BOOL* pbAutoLogonWithDefault
 	)
 {
+
+	Journal::log("Provider::Credential count\n");
 	HRESULT hr;
 
 	if(doAutoLogin && _dwNumCreds > 0 && !NFCCredential::lastLoginFailed){
@@ -342,7 +231,11 @@ HRESULT NFCProvider::GetCredentialAt(
 	DWORD dwIndex, 
 	ICredentialProviderCredential** ppcpc
 	)
-{
+{	
+	std::stringstream ss;
+	ss << dwIndex;
+	Journal::log("Provider::GetCredentialAt" + ss.str() + "\n");
+
 	HRESULT hr;
 
 	if((dwIndex < _dwNumCreds) && ppcpc)
@@ -351,6 +244,8 @@ HRESULT NFCProvider::GetCredentialAt(
 	}
 	else
 	{
+
+		Journal::log("Provider::can't get credentails at" + ss.str() + "\n");
 		hr = E_INVALIDARG;
 	}
 
@@ -364,6 +259,7 @@ HRESULT NFCProvider::_EnumerateOneCredential(
 	PWSTR pwzDomain
 	)
 {
+	Journal::log("Provider::_EnumerateOneCredential\n");
 	HRESULT hr;
 	NFCCredential* ppc = new NFCCredential();
 
@@ -391,12 +287,14 @@ HRESULT NFCProvider::_EnumerateOneCredential(
 }
 HRESULT NFCProvider::_EnumerateCredentials()
 {
+	Journal::log("Provider::_EnumerateCredentials");
 	HRESULT hr = _EnumerateOneCredential(0, NULL, NULL, NULL);
 
 	return hr;
 }
 HRESULT NFCProvider_CreateInstance(REFIID riid, void** ppv)
 {
+	Journal::log("Provider::NFCProvider_CreateInstance\n");
 	HRESULT hr;
 
 	NFCProvider* pProvider = new NFCProvider();
@@ -408,6 +306,7 @@ HRESULT NFCProvider_CreateInstance(REFIID riid, void** ppv)
 	}
 	else
 	{
+		Journal::log("failed\n");
 		hr = E_OUTOFMEMORY;
 	}
 

@@ -17,16 +17,15 @@ public:
 	* Constructs a new response.
 	* @param data the data recived.
 	*/
-	CommResponse(char* data)
-	{
-		this->data = data;
-	}
+	CommResponse(char* data);
+	virtual ~CommResponse() {};
 
 	/**
 	* Replies to the client who sent the data.
 	* @param data data to send.
 	*/
 	virtual void reply(char* data) = 0;
+	const char* getData();
 protected:
 	/**
 	* The data received.

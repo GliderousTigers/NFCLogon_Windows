@@ -29,7 +29,7 @@ public:
 	{
 		this->key = key;
 	}
-	~RSAPublicKeyPacket();
+	~RSAPublicKeyPacket() {}
 	static unsigned char PACKET_TYPE[2]; /**< The name of this packet type.*/
 
 	/**
